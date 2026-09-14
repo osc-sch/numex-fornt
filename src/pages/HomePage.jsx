@@ -9,6 +9,7 @@ const navItems = [
 
 function HomePage() {
   const [activeSection, setActiveSection] = useState('Inicio')
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   const sectionContent = useMemo(
     () => ({
@@ -64,10 +65,25 @@ function HomePage() {
 
   return (
     <div className="dashboard-page">
-      <div className="dashboard-shell">
-        <aside className="dashboard-sidebar">
+      <div className={isSidebarOpen ? 'dashboard-shell sidebar-open' : 'dashboard-shell'}>
+        <button
+          type="button"
+          className="sidebar-overlay"
+          aria-label="Cerrar menú"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+
+        <aside className="dashboard-sidebar" aria-label="Menú lateral">
           <div className="sidebar-header">
             <span className="brand-mark">NUMEX</span>
+            <button
+              type="button"
+              className="sidebar-close"
+              aria-label="Cerrar menú"
+              onClick={() => setIsSidebarOpen(false)}
+            >
+              <i className="bi bi-x-lg" aria-hidden="true" />
+            </button>
           </div>
 
           <div className="profile-summary">
@@ -84,7 +100,10 @@ function HomePage() {
                 key={item.label}
                 type="button"
                 className={activeSection === item.label ? 'nav-item active' : 'nav-item'}
-                onClick={() => setActiveSection(item.label)}
+                onClick={() => {
+                  setActiveSection(item.label)
+                  setIsSidebarOpen(false)
+                }}
               >
                 <span className="nav-icon" aria-hidden="true">
                   <i className={`bi ${item.icon}`} />
@@ -106,7 +125,16 @@ function HomePage() {
 
         <main className="dashboard-main">
           <header className="main-topbar">
-            <div>
+            <div className="topbar-heading">
+              <button
+                type="button"
+                className="menu-toggle"
+                aria-label="Abrir menú"
+                aria-expanded={isSidebarOpen}
+                onClick={() => setIsSidebarOpen(true)}
+              >
+                <i className="bi bi-list" aria-hidden="true" />
+              </button>
               <p className="eyebrow dashboard-eyebrow">{content.eyebrow}</p>
             </div>
             <button type="button" className="header-action">
