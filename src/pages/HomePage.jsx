@@ -4,64 +4,33 @@ const navItems = [
   { label: 'Inicio', icon: 'bi-house-door-fill' },
   { label: 'Desafíos', icon: 'bi-lightning-charge-fill' },
   { label: 'Mi progreso', icon: 'bi-bar-chart-fill' },
-  { label: 'Glosario', icon: 'bi-journal-text' },
+  { label: 'Biblioteca', icon: 'bi-journal-text' },
 ]
 
 function HomePage() {
   const [activeSection, setActiveSection] = useState('Inicio')
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [searchValue, setSearchValue] = useState('funciones')
 
-  const sectionContent = useMemo(
-    () => ({
-      Inicio: {
-        eyebrow: 'Tu espacio de estudio',
-        title: '¡Vamos a seguir avanzando juntos!',
-        description:
-          'Hoy podés repasar conceptos clave, resolver un desafío nuevo y revisar tu progreso en matemática con más confianza.',
-        highlights: [
-          { label: 'Desafíos hoy', value: '4' },
-          { label: 'Meta semanal', value: '72%' },
-          { label: 'Tiempo de práctica', value: '48 min' },
-        ],
-      },
-      Desafíos: {
-        eyebrow: 'Practicá con propósito',
-        title: 'Desafíos para seguir entrenando',
-        description:
-          'Elegí una actividad según tu nivel y reforzá los conceptos que más te cuestan con ejercicios guiados.',
-        highlights: [
-          { label: 'Nivel actual', value: 'Avanzado' },
-          { label: 'Ejercicios sin responder', value: '6' },
-          { label: 'Racha', value: '5 días' },
-        ],
-      },
-      'Mi progreso': {
-        eyebrow: 'Seguimiento académico',
-        title: 'Tu progreso está creciendo',
-        description:
-          'Revisá tus avances por tema, tus rachas y el rendimiento de tus últimas sesiones para mantener el impulso.',
-        highlights: [
-          { label: 'Temas dominados', value: '11' },
-          { label: 'Aciertos', value: '84%' },
-          { label: 'Puntaje promedio', value: '9.2' },
-        ],
-      },
-      Glosario: {
-        eyebrow: 'Repaso rápido',
-        title: 'Conceptos clave del curso',
-        description:
-          'Recordá definiciones y fórmulas útiles con acceso rápido a los términos más importantes de cada unidad.',
-        highlights: [
-          { label: 'Términos nuevos', value: '14' },
-          { label: 'Fórmulas guardadas', value: '8' },
-          { label: 'Último tema', value: 'Trigonometría' },
-        ],
-      },
-    }),
-    [],
-  )
+  const handleSearch = () => {
+    const trimmedQuery = searchValue.trim()
+    if (!trimmedQuery) {
+      return
+    }
 
-  const content = sectionContent[activeSection]
+    console.log('Buscar:', trimmedQuery)
+  }
+
+  const relatedSuggestions = [
+    'función afín',
+    'gráfica de una parábola',
+    'pendiente de una recta',
+    'dominio e imagen',
+    'función exponencial',
+    'ejercicios guiados',
+  ]
+
+  const resourceTabs = ['Definición', 'Gráfico', 'Fórmulas', 'Aplicación', 'Ejemplos']
 
   return (
     <div className="dashboard-page">
@@ -123,7 +92,7 @@ function HomePage() {
           </div>
         </aside>
 
-        <main className="dashboard-main">
+        <main className="dashboard-main dashboard-main-empty">
           <header className="main-topbar">
             <div className="topbar-heading">
               <button
@@ -135,76 +104,94 @@ function HomePage() {
               >
                 <i className="bi bi-list" aria-hidden="true" />
               </button>
-              <p className="eyebrow dashboard-eyebrow">{content.eyebrow}</p>
+              <p className="eyebrow dashboard-eyebrow">Pantalla en blanco</p>
             </div>
-            <button type="button" className="header-action">
+            <button type="button" className="header-action" aria-label="Notificaciones">
               <i className="bi bi-bell-fill" aria-hidden="true" />
             </button>
           </header>
 
-          <section className="welcome-panel">
-            <div>
-              <h1>{content.title}</h1>
-              <p>{content.description}</p>
+          <section className="search-results-shell" aria-label="Resultados de búsqueda">
+            <div className="search-bar-row">
+              <div className="search-bar-wrap">
+                <label className="search-bar" aria-label="Buscar en la biblioteca">
+                  <input
+                    type="text"
+                    value={searchValue}
+                    onChange={(event) => setSearchValue(event.target.value)}
+                    placeholder="Buscar en la biblioteca"
+                    className="search-input"
+                  />
+                </label>
+                <button type="button" className="search-button" onClick={handleSearch}>
+                  <i className="bi bi-search" aria-hidden="true" />
+                  <span>Buscar</span>
+                </button>
+              </div>
             </div>
-            <button type="button" className="primary-cta">
-              <i className="bi bi-play-fill" aria-hidden="true" />
-              <span>Continuar</span>
-            </button>
-          </section>
 
-          <section className="metrics-grid">
-            {content.highlights.map((metric) => (
-              <article key={metric.label} className="metric-card">
-                <span>{metric.label}</span>
-                <strong>{metric.value}</strong>
-              </article>
-            ))}
-          </section>
+            <div className="search-results-layout">
+              <div className="results-column">
+                <article className="google-result-card">
+                  <h2>Función lineal</h2>
+                  <p>
+                    Una función lineal tiene la forma y = mx + b, donde m representa la pendiente y
+                    b la ordenada al origen. Su gráfica es una recta y permite modelar relaciones
+                    proporcionales entre dos variables.
+                  </p>
+                </article>
 
-          <section className="content-grid">
-            <article className="info-card large-card">
-              <div className="card-header-row">
-                <h3>Actividad reciente</h3>
-                <span>Esta semana</span>
+                <article className="wiki-result-card">
+                  <h2>Funciones y gráficos</h2>
+
+                  <div className="result-tabs" role="tablist" aria-label="Secciones">
+                    {resourceTabs.map((tab, index) => (
+                      <button
+                        key={tab}
+                        type="button"
+                        className={index === 0 ? 'result-tab active' : 'result-tab'}
+                      >
+                        {tab}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="wiki-content-row">
+                    <div className="wiki-copy">
+                      <p>
+                        En matemática, una función asocia a cada valor de entrada exactamente un valor
+                        de salida. El dominio indica los valores posibles de x y la imagen, los valores
+                        que toma y. A partir del gráfico se puede leer la tendencia, los puntos de corte
+                        y el crecimiento o decrecimiento de la función.
+                      </p>
+                    </div>
+
+                    <div className="wiki-image-wrap">
+                      <img
+                        src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=900&q=80"
+                        alt="Gráfico de función matemática"
+                      />
+                    </div>
+                  </div>
+                </article>
+
+                <div className="bottom-result-header" aria-label="Preguntas sugeridas" />
               </div>
 
-              <div className="lesson-row">
-                <div className="lesson-bullet lesson-blue" aria-hidden="true" />
-                <div>
-                  <h4>Ecuaciones lineales</h4>
-                  <p>Completaste 3 ejercicios con un 90% de aciertos.</p>
-                </div>
-              </div>
-
-              <div className="lesson-row">
-                <div className="lesson-bullet lesson-pink" aria-hidden="true" />
-                <div>
-                  <h4>Funciones</h4>
-                  <p>Revisaste gráficos y resolviste 2 preguntas desafiantes.</p>
-                </div>
-              </div>
-            </article>
-
-            <article className="info-card">
-              <div className="card-header-row">
-                <h3>Próxima clase</h3>
-                <span>Hoy</span>
-              </div>
-
-              <div className="mini-schedule">
-                <div className="schedule-time">17:30</div>
-                <div>
-                  <h4>Álgebra aplicada</h4>
-                  <p>Repaso de sistemas de ecuaciones.</p>
-                </div>
-              </div>
-
-              <button type="button" className="secondary-cta">
-                <i className="bi bi-calendar3" aria-hidden="true" />
-                <span>Ver agenda</span>
-              </button>
-            </article>
+              <aside className="related-column">
+                <h3>También te puede interesar</h3>
+                <ul className="related-list">
+                  {relatedSuggestions.map((item) => (
+                    <li key={item}>
+                      <span className="search-icon" aria-hidden="true">
+                        <i className="bi bi-search" />
+                      </span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </aside>
+            </div>
           </section>
         </main>
       </div>

@@ -1,7 +1,9 @@
 import { Button, Form } from 'react-bootstrap'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 function LoginForm() {
+  const navigate = useNavigate()
+
   const handleSubmit = (event) => {
     event.preventDefault()
 
@@ -17,6 +19,8 @@ function LoginForm() {
       email,
       password,
     })
+
+    navigate('/home')
   }
 
   return (

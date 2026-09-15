@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 function RegisterForm({ onStepChange, onProfileTypeChange }) {
+  const navigate = useNavigate()
   const [profilePhoto, setProfilePhoto] = useState('')
   const [photoUrl, setPhotoUrl] = useState('')
   const [showPhotoModal, setShowPhotoModal] = useState(false)
@@ -105,6 +106,7 @@ function RegisterForm({ onStepChange, onProfileTypeChange }) {
     }
 
     console.log('Datos completos del registro:', registrationData)
+    navigate('/login')
   }
 
   return (
