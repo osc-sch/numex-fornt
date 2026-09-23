@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 const navItems = [
-  { label: 'Inicio', icon: 'bi-house-door-fill', path: '/home' },
+  { label: 'Inicio', icon: 'bi-house-door-fill', path: '/' },
   { label: 'Desafíos', icon: 'bi-lightning-charge-fill', path: '/challenges' },
   { label: 'Mi progreso', icon: 'bi-bar-chart-fill', path: '/progress' },
   { label: 'Biblioteca', icon: 'bi-journal-text', path: '/library' },
@@ -72,15 +72,6 @@ function DashboardLayout({ children, eyebrow }) {
               </button>
             ))}
           </nav>
-
-          <div className="sidebar-card">
-            <p className="sidebar-card-label">Objetivo del día</p>
-            <h5>Completar 2 desafíos</h5>
-            <div className="progress-track" aria-label="Progreso diario">
-              <span style={{ width: '72%' }} />
-            </div>
-            <small>72% completado</small>
-          </div>
         </aside>
 
         <main className="dashboard-main dashboard-main-empty">
