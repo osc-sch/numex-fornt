@@ -1,14 +1,17 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import {
+  Alert,
   Badge,
   Button,
   Card,
   Modal,
   ProgressBar,
+  Spinner,
 } from 'react-bootstrap'
 import { useNavigate } from 'react-router-dom'
 
 import DashboardLayout from '../components/DashboardLayout'
+import { submitTestCorrection } from '../services/testCorrection'
 import '../styles/activity-session.css'
 
 
@@ -62,6 +65,9 @@ function ActivitySessionPage({
   const [checkedQuestions, setCheckedQuestions] = useState({})
   const [showFinishModal, setShowFinishModal] = useState(false)
   const [completed, setCompleted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
+  const submissionInProgress = useRef(false)
 
   const currentQuestion = questions[currentIndex]
 
@@ -145,6 +151,7 @@ function ActivitySessionPage({
     }
 
     if (isLastQuestion) {
+      setSubmitError('')
       setShowFinishModal(true)
       return
     }
@@ -164,7 +171,33 @@ function ActivitySessionPage({
     setCurrentIndex(index)
   }
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
+    if (submissionInProgress.current || completed || remainingCount > 0) {
+      return
+    }
+
+    submissionInProgress.current = true
+    setIsSubmitting(true)
+    setSubmitError('')
+    let correctionProfile
+
+    try {
+      correctionProfile = await submitTestCorrection(sessionData, answers)
+      setShowFinishModal(false)
+      setCompleted(true)
+    } catch (error) {
+      console.error('No se pudo enviar el test para corregir:', error)
+      setSubmitError(
+        error instanceof TypeError
+          ? 'No se pudo conectar con el servicio de corrección. Tus respuestas se conservan; intentá nuevamente.'
+          : error.message || 'No se pudieron enviar las respuestas. Intentá nuevamente.'
+      )
+      return
+    } finally {
+      submissionInProgress.current = false
+      setIsSubmitting(false)
+    }
+
     const result = {
       session_id:
         sessionData?.test_id ??
@@ -174,15 +207,13 @@ function ActivitySessionPage({
       purpose,
 
       answers,
+      sessionData,
+      completed_at: new Date().toISOString(),
+      correctionProfile,
 
       total_questions: questions.length,
       answered_questions: answeredCount,
     }
-
-    console.log('Actividad finalizada:', result)
-
-    setShowFinishModal(false)
-    setCompleted(true)
 
     if (onComplete) {
       onComplete(result)
@@ -257,8 +288,12 @@ function ActivitySessionPage({
 
               <p>
                 Esta sesión todavía no tiene actividades
-                cargadas.
+                cargadas. Volvé al inicio para comenzar una actividad.
               </p>
+
+              <Button variant="primary" onClick={() => navigate('/')}>
+                Volver al inicio
+              </Button>
             </Card.Body>
           </Card>
         </section>
@@ -302,7 +337,7 @@ function ActivitySessionPage({
               onClick={() => navigate('/')}
             >
               <i className="bi bi-house-door me-2" />
-              Volver al inicio
+              Ver resultados en Inicio
             </Button>
           </Card.Body>
         </Card>
@@ -594,10 +629,16 @@ function ActivitySessionPage({
 
         <Modal
           show={showFinishModal}
-          onHide={() => setShowFinishModal(false)}
+          onHide={() => {
+            if (!isSubmitting) {
+              setShowFinishModal(false)
+            }
+          }}
+          backdrop={isSubmitting ? 'static' : true}
+          keyboard={!isSubmitting}
           centered
         >
-          <Modal.Header closeButton>
+          <Modal.Header closeButton={!isSubmitting}>
             <Modal.Title>
               ¿Finalizar la actividad?
             </Modal.Title>
@@ -611,6 +652,12 @@ function ActivitySessionPage({
               </strong>{' '}
               preguntas.
             </p>
+
+            {submitError && (
+              <Alert variant="danger">
+                {submitError}
+              </Alert>
+            )}
 
             {remainingCount > 0 && (
               <div className="finish-warning">
@@ -627,6 +674,7 @@ function ActivitySessionPage({
           <Modal.Footer>
             <Button
               variant="outline-secondary"
+              disabled={isSubmitting}
               onClick={() =>
                 setShowFinishModal(false)
               }
@@ -637,9 +685,23 @@ function ActivitySessionPage({
             <Button
               variant="primary"
               onClick={handleFinish}
-              disabled={remainingCount > 0}
+              disabled={remainingCount > 0 || isSubmitting}
+              aria-busy={isSubmitting}
             >
-              {config.finishLabel}
+              {isSubmitting ? (
+                <>
+                  <Spinner
+                    as="span"
+                    animation="border"
+                    size="sm"
+                    className="me-2"
+                    aria-hidden="true"
+                  />
+                  Enviando respuestas...
+                </>
+              ) : (
+                config.finishLabel
+              )}
             </Button>
           </Modal.Footer>
         </Modal>
