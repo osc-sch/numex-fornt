@@ -43,9 +43,9 @@ export function summarizeTestResult(result) {
   }
 }
 
-export function loadLatestTestResult() {
+export function loadLatestTestResult(userId) {
   try {
-    const stored = JSON.parse(localStorage.getItem(LATEST_RESULT_KEY))
+    const stored = JSON.parse(localStorage.getItem(userId ? `${LATEST_RESULT_KEY}:${userId}` : LATEST_RESULT_KEY))
     if (stored?.version !== 1) {
       return null
     }
@@ -57,9 +57,9 @@ export function loadLatestTestResult() {
   }
 }
 
-export function saveLatestTestResult(result) {
+export function saveLatestTestResult(result, userId) {
   try {
-    localStorage.setItem(LATEST_RESULT_KEY, JSON.stringify({ version: 1, result }))
+    localStorage.setItem(userId ? `${LATEST_RESULT_KEY}:${userId}` : LATEST_RESULT_KEY, JSON.stringify({ version: 1, result }))
     return true
   } catch {
     return false
