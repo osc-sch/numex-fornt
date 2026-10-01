@@ -13,7 +13,7 @@ async function request(path, { body, signal, ...options } = {}) {
       ...options,
       credentials: 'include',
       cache: 'no-store',
-      signal: signal ?? AbortSignal.timeout(15000),
+      signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(15000)]) : AbortSignal.timeout(15000),
       ...(body ? { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {}),
     })
   } catch (error) {
@@ -34,13 +34,21 @@ async function request(path, { body, signal, ...options } = {}) {
 }
 
 export const login = (credentials) => request('/login', { method: 'POST', body: credentials })
-export const register = (data) => request('/register', { method: 'POST', body: data })
+export async function register(data) {
+  const result = await request('/register', { method: 'POST', body: data })
+  if (!Number.isInteger(result.user?.id) || !Number.isInteger(result.profile?.id)) {
+    throw new AuthError('El servidor no pudo confirmar el registro. Intentá iniciar sesión antes de volver a registrarte.', 502)
+  }
+  return result
+}
 export const logout = () => request('/logout', { method: 'POST' })
 
 export async function getSession(options) {
   try {
     const data = await request('/profile', options)
-    if (!Number.isInteger(data.user?.id) || !data.profile) {
+    if (!Number.isInteger(data.user?.id) || data.user.id <= 0 ||
+        !Number.isInteger(data.profile?.id) || data.profile.id <= 0 || data.user.id_profile !== data.profile.id ||
+        typeof data.profile.test_diagnostic_completed !== 'boolean') {
       throw new AuthError('No se pudo recuperar tu perfil.', 500)
     }
     return data

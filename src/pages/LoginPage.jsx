@@ -4,7 +4,7 @@ import LoginForm from '../components/LoginForm'
 
 function LoginPage() {
   return (
-    <div className="auth-page">
+    <div className="auth-page login-page">
       <div className="auth-shell">
         <div className="auth-visual">
           <div className="auth-copy">

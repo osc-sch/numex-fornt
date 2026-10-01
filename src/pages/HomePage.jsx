@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Alert, Button, Modal, Spinner } from 'react-bootstrap'
+import { useAuth } from '../auth/authContext'
 
 import DashboardLayout from '../components/DashboardLayout'
+import HomeCarousel from '../components/HomeCarousel'
 import TestResults from '../components/TestResults'
 import { parseActivitySession } from '../utils/activitySession'
 
@@ -11,17 +13,8 @@ const DIAGNOSTIC_WEBHOOK_URL = import.meta.env.DEV
   : 'https://osc-sch.app.n8n.cloud/webhook-test/crear_actividades'
 
 function HomePage({ latestTestResult = null, resultSaved = true }) {
-  const [showDiagnosticModal, setShowDiagnosticModal] = useState(() => {
-    if (latestTestResult) {
-      return false
-    }
-
-    try {
-      return !localStorage.getItem('numex_diagnostic_modal_seen')
-    } catch {
-      return true
-    }
-  })
+  const { user, profile } = useAuth()
+  const diagnosticPending = profile.test_diagnostic_completed === false
   const [isStartingDiagnostic, setIsStartingDiagnostic] = useState(false)
   const [diagnosticError, setDiagnosticError] = useState('')
 
@@ -44,8 +37,8 @@ function HomePage({ latestTestResult = null, resultSaved = true }) {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            nombre: 'Jose',
-            anio_curso: 4,
+            nombre: profile.nombre,
+            anio_curso: profile.anio_cursada,
             habilidades: [],
             dificultades: [],
           }),
@@ -73,12 +66,6 @@ function HomePage({ latestTestResult = null, resultSaved = true }) {
       })
       const sessionData = parseActivitySession(payload)
 
-      try {
-        localStorage.setItem('numex_diagnostic_modal_seen', 'true')
-      } catch (error) {
-        console.warn('No se pudo guardar la preferencia del aviso inicial:', error)
-      }
-      setShowDiagnosticModal(false)
       navigate('/diagnostic', { state: { sessionData } })
     } catch (error) {
       console.error('No se pudo iniciar el diagnóstico:', error)
@@ -95,31 +82,7 @@ function HomePage({ latestTestResult = null, resultSaved = true }) {
   return (
     <>
       <DashboardLayout eyebrow="Inicio">
-        <section
-          className="dashboard-welcome"
-          aria-labelledby="welcome-title"
-        >
-          <p className="eyebrow">Tu espacio de aprendizaje</p>
-
-          <h1 id="welcome-title">
-            Hola, {latestTestResult?.sessionData.alumno.nombre ?? 'Agustina'}
-          </h1>
-
-          <p>
-            Continúa practicando y descubre nuevos recursos
-            para avanzar en matemática.
-          </p>
-
-          <Button
-            variant="primary"
-            onClick={() => {
-              setDiagnosticError('')
-              setShowDiagnosticModal(true)
-            }}
-          >
-            Ir al test de diagnóstico
-          </Button>
-        </section>
+        <HomeCarousel displayName={profile.nombre || user.user_name} />
 
         {latestTestResult && !resultSaved && (
           <Alert variant="warning">
@@ -131,12 +94,14 @@ function HomePage({ latestTestResult = null, resultSaved = true }) {
       </DashboardLayout>
 
       <Modal
-        show={showDiagnosticModal}
+        className="dashboard-modal diagnostic-modal"
+        show={diagnosticPending}
         centered
         backdrop="static"
         keyboard={false}
       >
         <Modal.Header>
+          <span className="modal-topic-icon"><i className="bi bi-clipboard2-pulse" aria-hidden="true" /></span>
           <Modal.Title>
             Antes de comenzar
           </Modal.Title>

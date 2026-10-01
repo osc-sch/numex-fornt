@@ -5,39 +5,26 @@ import RegisterForm from '../components/RegisterForm'
 
 function RegisterPage() {
   const [registrationStep, setRegistrationStep] = useState(1)
-  const [profileType, setProfileType] = useState('alumno')
 
   const isSecondStep = registrationStep === 2
-  const roleContent = profileType === 'alumno'
-    ? {
-        eyebrow: 'Tu camino para aprender',
-        title: 'Todo lo que necesitás para avanzar en matemática.',
-        description: 'Aprendé a tu ritmo con herramientas pensadas para acompañarte en cada etapa escolar.',
-        features: [
-          'Ejercicios adaptados a tu año escolar',
-          'Explicaciones claras paso a paso',
-          'Seguimiento de tu progreso y tus metas',
-          'Desafíos para practicar y ganar confianza',
-        ],
-      }
-    : {
-        eyebrow: 'Un espacio para enseñar mejor',
-        title: 'Herramientas para acompañar el aprendizaje.',
-        description: 'Organizá tus propuestas y ayudá a cada estudiante a construir una relación más segura con la matemática.',
-        features: [
-          'Recursos para preparar clases dinámicas',
-          'Seguimiento del avance de cada alumno',
-          'Actividades y desafíos listos para usar',
-          'Una comunidad educativa en crecimiento',
-        ],
-      }
+  const roleContent = {
+    eyebrow: 'Tu camino para aprender',
+    title: 'Todo lo que necesitás para avanzar en matemática.',
+    description: 'Aprendé a tu ritmo con herramientas pensadas para acompañarte en cada etapa escolar.',
+    features: [
+      'Ejercicios adaptados a tu año escolar',
+      'Explicaciones claras paso a paso',
+      'Seguimiento de tu progreso y tus metas',
+      'Desafíos para practicar y ganar confianza',
+    ],
+  }
 
   return (
     <div className="auth-page">
       <div className="auth-shell">
         <div className="auth-visual">
           <div className="auth-copy">
-            <div className="auth-copy-content" key={`${registrationStep}-${profileType}`}>
+            <div className="auth-copy-content" key={registrationStep}>
               <div className="eyebrow">
                 {isSecondStep ? roleContent.eyebrow : 'Aprender matemáticas con confianza'}
               </div>
@@ -97,7 +84,6 @@ function RegisterPage() {
                 <div className="auth-card">
                   <RegisterForm
                     onStepChange={setRegistrationStep}
-                    onProfileTypeChange={setProfileType}
                   />
                 </div>
               </Col>

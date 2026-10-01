@@ -78,6 +78,11 @@ function LibraryPage() {
   return (
     <DashboardLayout eyebrow="Biblioteca">
       <section className="search-results-shell" aria-label="Resultados de búsqueda">
+        <header className="library-heading">
+          <p className="eyebrow">Un mundo por descubrir</p>
+          <h1>Tu biblioteca de ideas.</h1>
+          <p>Encontrá explicaciones, fórmulas y ejemplos para entender un poco más.</p>
+        </header>
         <div className="search-bar-row">
           <form className="search-bar-wrap input-group" onSubmit={(event) => {
             event.preventDefault()
@@ -94,7 +99,7 @@ function LibraryPage() {
               placeholder="Buscar en la biblioteca"
               className="form-control search-input"
             />
-            <button type="submit" className="btn btn-primary search-button">
+            <button type="submit" className="btn btn-primary search-button" aria-label="Buscar en la biblioteca">
               <i className="bi bi-search" aria-hidden="true" />
               <span>Buscar</span>
             </button>

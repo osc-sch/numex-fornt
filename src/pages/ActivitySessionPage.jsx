@@ -628,6 +628,7 @@ function ActivitySessionPage({
         </div>
 
         <Modal
+          className="dashboard-modal"
           show={showFinishModal}
           onHide={() => {
             if (!isSubmitting) {

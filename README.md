@@ -1,4 +1,59 @@
+# Registro de alumnos
+
+El formulario de `/register` crea la cuenta y el perfil mediante
+`POST /api/auth/register`. Por ahora solo se registran alumnos; el backend
+asigna el rol `3` y calcula el ciclo según la institución y el año escolar.
+La foto es opcional y se guarda como una URL HTTP/HTTPS.
+
+Para probarlo:
+
+1. En `NUMEX-BACKEND`, configurá la base MySQL y `JWT_SECRET` según `AUTH.md`
+   y ejecutá `npm run dev`.
+2. En este proyecto, ejecutá `npm run dev` y abrí `/register`.
+   El proxy ya apunta a `http://127.0.0.1:3000`. Si cambia el destino,
+   copiá `.env.example` a `.env.local`, ajustá `BACKEND_URL` y reiniciá Vite.
+3. Completá ambos pasos. Una respuesta exitosa muestra la confirmación en
+   `/login`; un error mantiene los datos para corregirlos o reintentar.
+
+Se validan la confirmación de contraseña, la fecha de nacimiento, el DNI y
+el año escolar. La API devuelve `409` para email o DNI duplicados y guarda
+el perfil y la cuenta dentro de una misma transacción.
+
+En producción, configurá el servidor web para reenviar
+`/api/auth` al backend en el mismo origen; el proxy de desarrollo de Vite
+no forma parte de los archivos compilados.
+
+Pruebas del frontend: `node --test tests/*.test.js`. Validaciones adicionales:
+`npm run lint` y `npm run build`.
+
+# Inicio y cierre de sesión
+
+`/login` envía email y contraseña a `POST /api/auth/login` y luego consulta
+`GET /api/auth/profile` para confirmar la sesión y cargar el perfil del alumno.
+La API mantiene la sesión durante una hora mediante una cookie HttpOnly.
+No se guardan contraseñas ni tokens en localStorage ni se imprimen en consola.
+
+Al ingresar, se vuelve a la página protegida que se había intentado abrir o
+a Inicio. La sesión se recupera al recargar y se comprueba al volver a la pestaña
+y cada minuto. Si vence, se vuelve al login. Si hay un problema de conexión,
+se muestra un error con la opción de reintentar.
+
+El menú muestra el nombre y la foto del perfil y permite **Cerrar sesión**
+mediante `POST /api/auth/logout`. El saludo y los datos enviados al diagnóstico
+usan el alumno autenticado. Las opciones de recordar sesión por más tiempo
+y recuperar contraseña quedan pendientes de soporte en el backend.
+
 # Diagnóstico con n8n
+
+El modal inicial depende de `profile.test_diagnostic_completed`, recibido en
+`GET /api/auth/profile`: con `false` se muestra automáticamente; con `true`
+se omite. Se actualiza cuando se refresca la sesión. La marca antigua
+`numex_diagnostic_modal_seen` y los resultados locales no determinan si el
+diagnóstico está completado. El campo debe llegar como booleano JSON.
+
+El botón **Ir al test de diagnóstico** permite abrirlo manualmente incluso
+si ya se completó. Iniciar el diagnóstico no modifica el estado de la base;
+ese estado debe actualizarse desde el backend cuando corresponda.
 
 El botón **Ir al test de diagnóstico** de Inicio envía un `POST` con:
 
@@ -10,6 +65,9 @@ El botón **Ir al test de diagnóstico** de Inicio envía un `POST` con:
   "dificultades": []
 }
 ```
+
+`nombre` y `anio_curso` se completan con el perfil del alumno autenticado;
+los valores del ejemplo son ilustrativos.
 
 Para probarlo en desarrollo:
 

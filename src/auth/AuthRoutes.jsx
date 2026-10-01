@@ -1,6 +1,7 @@
 import { Alert, Button, Spinner } from 'react-bootstrap'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from './authContext'
+import { getLoginDestination } from './loginDestination'
 
 function SessionStatus() {
   const { status, error, refreshSession } = useAuth()
@@ -26,7 +27,8 @@ export function RequireAuth() {
 
 export function PublicAuth() {
   const { status } = useAuth()
+  const location = useLocation()
   if (status === 'loading') return <SessionStatus />
-  if (status === 'authenticated') return <Navigate to="/" replace />
+  if (status === 'authenticated') return <Navigate to={getLoginDestination(location.state?.from)} replace />
   return <Outlet />
 }

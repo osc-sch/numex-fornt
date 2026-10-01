@@ -5,19 +5,20 @@ import * as api from '../services/auth'
 export default function AuthProvider({ children }) {
   const [state, setState] = useState({ status: 'loading', session: null, error: '' })
   const revision = useRef(0)
+  const changingSession = useRef(false)
 
-  const refreshSession = useCallback(async (signal) => {
+  const refreshSession = useCallback((signal) => {
+    if (changingSession.current || signal?.aborted) return Promise.resolve()
     const current = ++revision.current
-    try {
-      const session = await api.getSession({ signal })
-      if (current === revision.current) {
+    return api.getSession({ signal }).then((session) => {
+      if (current === revision.current && !signal?.aborted) {
         setState({ status: session ? 'authenticated' : 'anonymous', session, error: '' })
       }
-    } catch (error) {
-      if (error.name !== 'AbortError' && current === revision.current) {
+    }).catch((error) => {
+      if (error.name !== 'AbortError' && current === revision.current && !signal?.aborted) {
         setState({ status: 'error', session: null, error: error.message })
       }
-    }
+    })
   }, [])
 
   useEffect(() => {
@@ -38,18 +39,29 @@ export default function AuthProvider({ children }) {
   }, [refreshSession])
 
   const login = async (credentials) => {
+    if (changingSession.current) throw new Error('Esperá a que termine la solicitud actual.')
+    changingSession.current = true
     const current = ++revision.current
-    await api.login(credentials)
-    const session = await api.getSession()
-    if (!session) throw new Error('No se pudo mantener la sesión. Revisá que las cookies estén habilitadas.')
-    if (current === revision.current) setState({ status: 'authenticated', session, error: '' })
+    try {
+      await api.login(credentials)
+      const session = await api.getSession()
+      if (!session) throw new Error('No se pudo mantener la sesión. Revisá que las cookies estén habilitadas.')
+      if (current === revision.current) setState({ status: 'authenticated', session, error: '' })
+    } finally {
+      changingSession.current = false
+    }
   }
 
   const logout = async () => {
-    ++revision.current
-    await api.logout()
-    ++revision.current
-    setState({ status: 'anonymous', session: null, error: '' })
+    if (changingSession.current) throw new Error('Esperá a que termine la solicitud actual.')
+    changingSession.current = true
+    const current = ++revision.current
+    try {
+      await api.logout()
+      if (current === revision.current) setState({ status: 'anonymous', session: null, error: '' })
+    } finally {
+      changingSession.current = false
+    }
   }
 
   return (

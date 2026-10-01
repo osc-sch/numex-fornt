@@ -2,7 +2,7 @@ import { Badge, Card, Col, ProgressBar, Row } from 'react-bootstrap'
 import DashboardLayout from '../components/DashboardLayout'
 
 const areaProgress = [
-  { name: 'Álgebra', detail: 'Funciones y ecuaciones', progress: 78, icon: 'bi-function', color: 'blue' },
+  { name: 'Álgebra', detail: 'Funciones y ecuaciones', progress: 78, icon: 'bi-graph-up', color: 'blue' },
   { name: 'Números', detail: 'Fracciones y operaciones', progress: 64, icon: 'bi-123', color: 'green' },
   { name: 'Geometría', detail: 'Figuras y medidas', progress: 42, icon: 'bi-bounding-box', color: 'purple' },
   { name: 'Estadística', detail: 'Datos y probabilidad', progress: 28, icon: 'bi-bar-chart', color: 'yellow' },

@@ -18,6 +18,10 @@
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.12);
 }
 
+.login-page .auth-shell {
+  width: 100%;
+}
+
 .auth-visual {
   position: relative;
   background:
